@@ -85,23 +85,33 @@ bool existeCiudad(string nombreBuscar)
     return false;
 }
 
-string busquedaEnProdundidad(string recorrido, Ciudad c)
+string busquedaEnProdundidad(string recorrido, Ciudad c, string buscarCiudad)
 {
     string camino = recorrido + c.getNombre() + " -> ";
+    if (c.getNombre().compare(buscarCiudad) == 0)
+    {
+        camino = camino + "\b\b\b\b.   \n\nSi se encontro la ciudad: " + buscarCiudad;
+        return camino;
+    }  
     for (auto it = c.getCiudaristas().begin() ; it != c.getCiudaristas().end(); it++)
     {
         Ciudad v = recuperaCiudad((*it).getNombre());
 
         if(camino.find(v.getNombre()) == string::npos)
         {
-            camino = busquedaEnProdundidad(camino, v);
+            camino = busquedaEnProdundidad(camino, v, buscarCiudad);
+            if (!(camino.find(buscarCiudad) == string::npos))
+            {
+                return camino;
+            }
             camino = camino + c.getNombre () + " -> ";
+            
         }
     }
     return camino;
 }
 
-string busquedaEnAmplitud(string recorrido, Ciudad &c, queue<Ciudad> &cola)
+string busquedaEnAmplitud(string recorrido, Ciudad &c, queue<Ciudad> &cola, string buscarCiudad)
 {
     cola.push(c);
     while (!cola.empty())
@@ -114,13 +124,18 @@ string busquedaEnAmplitud(string recorrido, Ciudad &c, queue<Ciudad> &cola)
             if(recorrido.find(v.getNombre()) == string::npos)
             {
                 recorrido = recorrido + v.getNombre() + " -> ";
+                if (v.getNombre().compare(buscarCiudad) == 0)
+                {
+                    recorrido = recorrido + "\b\b\b\b.   \nSi se encontro la ciudad: " + buscarCiudad;
+                    return recorrido;
+                }
                 recorrido = recorrido + frente.getNombre() + " -> ";
                 cola.push(v);
             }
         }
         cola.pop();
     }
-    recorrido = recorrido + "\b\b\b\b.   ";
+    recorrido = recorrido + "\b\b\b\b.   \nLa ciudad a buscar no fue encontrada...";
     return recorrido;
 }
 
@@ -406,7 +421,7 @@ int main()
             
             case 3:
                 crearTexas();
-                cout <<endl<< "Estado de Jalisco creado :D"<<endl;
+                cout <<endl<< "Estado de Texas creado :D"<<endl;
                 break;
             
             case 4:
@@ -467,8 +482,8 @@ int main()
                         for (auto it = ciudades_grafo.begin(); it != ciudades_grafo.end() ; it++)
                         {
                             Ciudad aux = *it;
-                            aux.eliminarCiudaristas(nombreAbuscar);
-                            if (aux.getNombre().compare(ciudad_encontrada.getNombre()) == 0)
+                            aux.eliminarCiudaristas(nombreAbuscar); 
+                            if(aux.getNombre().compare(ciudad_encontrada.getNombre()) == 0)
                             {
                                 ciudades_grafo.erase(it);
                             }
@@ -518,11 +533,15 @@ int main()
                         cout << endl << "nombre de la segunda ciudad: ";
                         getline(cin, nombre_c2);
                         flag = existeCiudad(nombre_c2);
+                        if(nombre_c2.compare(nombre_c1) == 0)
+                        {
+                            cout <<endl << "La ciudad debe de ser diferente a la ciudad previamente seleccionada"<<endl; 
+                        }
                         if (!flag)
                         {
                             cout << endl<< "No existe una ciudad con ese nombre. Intenta nuevamente";
                         }
-                    } while (!flag);
+                    } while ((!flag) || (nombre_c2.compare(nombre_c1) == 0));
                     c2 = recuperaCiudad(nombre_c2);
                     if(c1.existeCiudarista(nombre_c2))
                     {
@@ -544,7 +563,6 @@ int main()
                         recuperaCiudad(nombre_c2).insertarCiudarista(c1, distancia);
                         cout << endl << "Se ha creado la nueva carretera " << c1.getNombre() << " - " << c2.getNombre() << " :D ----"<<endl;
                     }               
-
                 }
                 else
                 {
@@ -560,7 +578,7 @@ int main()
                 {
                     bool flag;
                     Ciudad c;
-                    string nombre_ciudad, recorrido;
+                    string nombre_ciudad, nombre_c2, recorrido;
                     int distancia;
                     system("cls");
                     cout << "\t\t\t BUSQUEDA EN PROFUNDIDAD" <<endl;
@@ -574,9 +592,22 @@ int main()
                             cout << endl<< "No existe una ciudad con ese nombre. Intenta nuevamente";
                         }
                     } while (!flag);
+                    do
+                    {
+                        cout << endl << "nombre de la ciudad a buscar: ";
+                        getline(cin, nombre_c2);
+                        flag = existeCiudad(nombre_c2);
+                        if(nombre_c2.compare(nombre_ciudad) == 0)
+                        {
+                            cout <<endl << "La ciudad debe de ser diferente a la ciudad previamente seleccionada"<<endl; 
+                        }
+                    } while (nombre_c2.compare(nombre_ciudad) == 0);
                     c = recuperaCiudad(nombre_ciudad);
-                    recorrido = busquedaEnProdundidad("", c);
-                    recorrido = recorrido + "\b\b\b\b.   ";
+                    recorrido = busquedaEnProdundidad("", c, nombre_c2);
+                    if (recorrido.find(nombre_c2) == string::npos)
+                    {
+                        recorrido = recorrido + "\b\b\b\b.   \n\nLa ciudad "+ nombre_c2 + " no se encontro...";
+                    }
                     cout << endl << "-----**-------**------**" <<endl;
                     cout << "La busqueda ha finalizado. El recorrido fue el siguiente:"<<endl<<recorrido<<endl<<endl;
                 }
@@ -584,7 +615,6 @@ int main()
                 {
                     cout << endl << " ** Deben de existir al menos 2 ciudades y una carretera para poder hacer la busqueda **"<<endl;
                 }
-                
             }
             system("pause");
             break;
@@ -594,7 +624,7 @@ int main()
                 {
                     bool flag;
                     Ciudad c;
-                    string nombre_ciudad, recorrido;
+                    string nombre_ciudad, recorrido, nombre_c2;
                     int distancia;
                     system("cls");
                     cout << "\t\t\t BUSQUEDA EN AMPLITUD" <<endl;
@@ -609,8 +639,18 @@ int main()
                         }
                     } while (!flag);
                     c = recuperaCiudad(nombre_ciudad);
+                    do
+                    {
+                        cout << endl << "nombre de la ciudad a buscar: ";
+                        getline(cin, nombre_c2);
+                        flag = existeCiudad(nombre_c2);
+                        if(nombre_c2.compare(nombre_ciudad) == 0)
+                        {
+                            cout <<endl << "La ciudad debe de ser diferente a la ciudad previamente seleccionada"<<endl; 
+                        }
+                    } while (nombre_c2.compare(nombre_ciudad) == 0);
                     queue<Ciudad> cola;
-                    recorrido = busquedaEnAmplitud("", c, cola);
+                    recorrido = busquedaEnAmplitud("", c, cola, nombre_c2);
                     cout << endl << "-------.....------_______------......---------"<< endl;
                     cout << "La busqueda ha finalizado. El recorrido fue el siguiente:"<<endl<< endl <<recorrido<<endl<<endl;
                 }

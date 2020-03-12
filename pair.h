@@ -4,8 +4,13 @@ using namespace std;
 class Trio
 {
     public:
-        Par();
+        Trio();
         bool definitivo;
         string hizoDefinitvo;
         int peso;
 };
+
+Trio::Trio()
+{
+    // do nothing
+}
